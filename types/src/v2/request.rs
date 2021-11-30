@@ -117,7 +117,9 @@ impl<'a> NotificationSer<'a> {
 
 #[cfg(test)]
 mod test {
-	use super::{Id, InvalidRequest, Notification, NotificationSer, ParamsSer, Request, RequestSer, TwoPointZero};
+	use crate::serde_from_str;
+
+use super::{Id, InvalidRequest, Notification, NotificationSer, ParamsSer, Request, RequestSer, TwoPointZero};
 	use serde_json::{value::RawValue, Value};
 
 	fn assert_request<'a>(request: Request<'a>, id: Id<'a>, method: &str, params: Option<&str>) {
@@ -148,7 +150,7 @@ mod test {
 		];
 
 		for (ser, id, params, method) in test_vector.into_iter() {
-			let request = serde_json::from_str(ser).unwrap();
+			let request = crate::serde_from_str(ser).unwrap();
 			assert_request(request, id, method, params);
 		}
 	}
@@ -163,7 +165,7 @@ mod test {
 	#[test]
 	fn deserialize_valid_notif_works() {
 		let ser = r#"{"jsonrpc":"2.0","method":"say_hello","params":[]}"#;
-		let dsr: Notification<&RawValue> = serde_json::from_str(ser).unwrap();
+		let dsr: Notification<&RawValue> = crate::serde_from_str(ser).unwrap();
 		assert_eq!(dsr.method, "say_hello");
 		assert_eq!(dsr.jsonrpc, TwoPointZero);
 	}
@@ -179,13 +181,13 @@ mod test {
 	#[test]
 	fn deserialize_call_bad_id_should_fail() {
 		let ser = r#"{"jsonrpc":"2.0","method":"say_hello","params":[],"id":{}}"#;
-		assert!(serde_json::from_str::<Request>(ser).is_err());
+		assert!(crate::serde_from_str::<Request>(ser).is_err());
 	}
 
 	#[test]
 	fn deserialize_invalid_request() {
 		let s = r#"{"id":120,"method":"my_method","params":["foo", "bar"],"extra_field":[]}"#;
-		let deserialized: InvalidRequest = serde_json::from_str(s).unwrap();
+		let deserialized: InvalidRequest = crate::serde_from_str(s).unwrap();
 		assert_eq!(deserialized, InvalidRequest { id: Id::Number(120) });
 	}
 

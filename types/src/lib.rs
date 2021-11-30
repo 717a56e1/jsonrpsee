@@ -67,3 +67,34 @@ pub mod __reexports {
 
 /// JSON-RPC result.
 pub type RpcResult<T> = std::result::Result<T, Error>;
+
+
+/// workaround for https://github.com/serde-rs/json/issues/505
+/// Arbitrary precision confuses serde when deserializing into untagged enums,
+/// this is a workaround
+pub fn serde_from_str<'a, T>(input: &'a str) -> std::result::Result<T, serde_json::Error>
+where
+	T: serde::de::Deserialize<'a>,
+{
+	if cfg!(feature = "arbitrary_precision") {
+		let val = serde_json::from_str::<serde_json::Value>(input)?;
+		T::deserialize(val)
+	} else {
+		serde_json::from_str::<T>(input)
+	}
+}
+
+/// workaround for https://github.com/serde-rs/json/issues/505
+/// Arbitrary precision confuses serde when deserializing into untagged enums,
+/// this is a workaround
+pub fn serde_from_slice<'a, T>(input: &'a [u8]) -> std::result::Result<T, serde_json::Error>
+where
+	T: serde::de::Deserialize<'a>,
+{
+	if cfg!(feature = "arbitrary_precision") {
+		let val = serde_json::from_slice::<serde_json::Value>(input)?;
+		T::deserialize(val)
+	} else {
+		serde_json::from_slice::<T>(input)
+	}
+}

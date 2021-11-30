@@ -283,14 +283,14 @@ impl Server {
 
 						// Single request or notification
 						if is_single {
-							if let Ok(req) = serde_json::from_slice::<Request>(&body) {
+							if let Ok(req) = crate::types::serde_from_slice::<Request>(&body) {
 								// NOTE: we don't need to track connection id on HTTP, so using hardcoded 0 here.
 								if let Some(fut) =
 									methods.execute_with_resources(&tx, req, 0, &resources, max_request_body_size)
 								{
 									fut.await;
 								}
-							} else if let Ok(_req) = serde_json::from_slice::<Notif>(&body) {
+							} else if let Ok(_req) = crate::types::serde_from_slice::<Notif>(&body) {
 								return Ok::<_, HyperError>(response::ok_response("".into()));
 							} else {
 								let (id, code) = prepare_error(&body);

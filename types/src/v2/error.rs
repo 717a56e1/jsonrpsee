@@ -247,7 +247,7 @@ mod tests {
 			error: ErrorObject { code: ErrorCode::ParseError, message: "Parse error".into(), data: None },
 			id: Id::Null,
 		};
-		let err: RpcError = serde_json::from_str(ser).unwrap();
+		let err: RpcError = crate::serde_from_str(ser).unwrap();
 		assert_eq!(exp, err);
 	}
 
@@ -275,7 +275,7 @@ mod tests {
 			"id": 7,
 			"jsonrpc": "2.0"
 		}"#;
-		let err: RpcError = serde_json::from_str(raw).unwrap();
+		let err: RpcError = crate::serde_from_str(raw).unwrap();
 
 		let data = serde_json::value::to_raw_value(&"\\\"validate_transaction\\\"").unwrap();
 

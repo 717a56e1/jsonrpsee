@@ -27,3 +27,6 @@ unicase = "2.6.0"
 env_logger = "0.9"
 jsonrpsee-test-utils = { path = "../test-utils" }
 jsonrpsee = { path = "../jsonrpsee", features = ["full"] }
+
+[features]
+arbitrary_precision = ["serde_json/arbitrary_precision"]

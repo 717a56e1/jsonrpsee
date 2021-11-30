@@ -32,3 +32,6 @@ env_logger = "0.9"
 jsonrpsee-test-utils = { path = "../test-utils" }
 jsonrpsee-utils = { path = "../utils", features = ["client"] }
 tokio = { version = "1", features = ["macros"] }
+
+[features]
+arbitrary_precision = ["serde_json/arbitrary_precision"]

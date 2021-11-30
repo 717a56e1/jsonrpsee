@@ -26,3 +26,6 @@ url = "2.2"
 [dev-dependencies]
 jsonrpsee-test-utils = { path = "../test-utils" }
 tokio = { package = "tokio", version = "1", features = ["net", "rt-multi-thread", "macros"] }
+
+[features]
+arbitrary_precision = ["serde_json/arbitrary_precision"]

@@ -559,7 +559,7 @@ async fn background_task(
 			}
 			Either::Right((Some(Ok(raw)), _)) => {
 				// Single response to a request.
-				if let Ok(single) = serde_json::from_slice::<Response<_>>(&raw) {
+				if let Ok(single) = crate::types::serde_from_slice::<Response<_>>(&raw) {
 					tracing::debug!("[backend]: recv method_call {:?}", single);
 					match process_single_response(&mut manager, single, max_notifs_per_subscription) {
 						Ok(Some(unsub)) => {
@@ -573,19 +573,19 @@ async fn background_task(
 					}
 				}
 				// Subscription response.
-				else if let Ok(response) = serde_json::from_slice::<SubscriptionResponse<_>>(&raw) {
+				else if let Ok(response) = crate::types::serde_from_slice::<SubscriptionResponse<_>>(&raw) {
 					tracing::debug!("[backend]: recv subscription {:?}", response);
 					if let Err(Some(unsub)) = process_subscription_response(&mut manager, response) {
 						let _ = stop_subscription(&mut sender, &mut manager, unsub).await;
 					}
 				}
 				// Incoming Notification
-				else if let Ok(notif) = serde_json::from_slice::<Notification<_>>(&raw) {
+				else if let Ok(notif) = crate::types::serde_from_slice::<Notification<_>>(&raw) {
 					tracing::debug!("[backend]: recv notification {:?}", notif);
 					let _ = process_notification(&mut manager, notif);
 				}
 				// Batch response.
-				else if let Ok(batch) = serde_json::from_slice::<Vec<Response<_>>>(&raw) {
+				else if let Ok(batch) = crate::types::serde_from_slice::<Vec<Response<_>>>(&raw) {
 					tracing::debug!("[backend]: recv batch {:?}", batch);
 					if let Err(e) = process_batch_response(&mut manager, batch) {
 						let _ = front_error.send(e);
@@ -593,7 +593,7 @@ async fn background_task(
 					}
 				}
 				// Error response
-				else if let Ok(err) = serde_json::from_slice::<RpcError>(&raw) {
+				else if let Ok(err) = crate::types::serde_from_slice::<RpcError>(&raw) {
 					tracing::debug!("[backend]: recv error response {:?}", err);
 					if let Err(e) = process_error_response(&mut manager, err) {
 						let _ = front_error.send(e);
@@ -604,7 +604,7 @@ async fn background_task(
 				else {
 					tracing::debug!(
 						"[backend]: recv unparseable message: {:?}",
-						serde_json::from_slice::<serde_json::Value>(&raw)
+						crate::types::serde_from_slice::<serde_json::Value>(&raw)
 					);
 					let _ = front_error.send(Error::Custom("Unparsable response".into()));
 					break;

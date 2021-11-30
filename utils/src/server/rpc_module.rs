@@ -29,7 +29,7 @@ use crate::server::resource_limiting::{ResourceGuard, ResourceTable, ResourceVec
 use beef::Cow;
 use futures_channel::{mpsc, oneshot};
 use futures_util::{future::BoxFuture, FutureExt, StreamExt};
-use jsonrpsee_types::to_json_raw_value;
+use jsonrpsee_types::{to_json_raw_value, serde_from_str};
 use jsonrpsee_types::v2::error::{invalid_subscription_err, CALL_EXECUTION_FAILED_CODE};
 use jsonrpsee_types::{
 	error::{Error, SubscriptionClosedError},
@@ -373,7 +373,7 @@ impl Methods {
 			fut.await;
 		}
 		let response = rx.next().await.expect("Could not establish subscription.");
-		let subscription_response = serde_json::from_str::<Response<SubscriptionId>>(&response)
+		let subscription_response = serde_from_str::<Response<SubscriptionId>>(&response)
 			.unwrap_or_else(|_| panic!("Could not deserialize subscription response {:?}", response));
 		let sub_id = subscription_response.result;
 		TestSubscription { tx, rx, sub_id }
@@ -762,7 +762,7 @@ impl TestSubscription {
 	pub async fn next<T: DeserializeOwned>(&mut self) -> Option<(T, jsonrpsee_types::v2::SubscriptionId)> {
 		let raw = self.rx.next().await?;
 		let val: SubscriptionResponse<T> =
-			serde_json::from_str(&raw).expect("valid response in TestSubscription::next()");
+			serde_from_str(&raw).expect("valid response in TestSubscription::next()");
 		Some((val.params.result, val.params.subscription))
 	}
 }
